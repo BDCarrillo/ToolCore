@@ -63,10 +63,12 @@ namespace ToolCore.Session
 
         private void UpdateComp(ToolComp comp)
         {
+            var step = "";
             try
             {
                 var modeData = comp.ModeData;
                 var def = modeData.Definition;
+                step = "UpdateTool";
 
                 UpdateTool(comp);
 
@@ -81,42 +83,48 @@ namespace ToolCore.Session
                     UpdateHitState(comp);
 
                 if (!IsDedicated && comp.Draw && comp.Functional)
+                {
+                    step = "DrawComp";
                     DrawComp(comp);
+                }
 
                 if (!IsDedicated && def.Debug)
                 {
                     DrawDebug(comp);
                 }
 
-                if (comp.Broken)
+                if (comp.Broken && comp.BrokenTick != Tick)
                     UnregisterBrokenComp(comp);
             }
             catch (Exception ex)
             {
                 if (!comp.Broken)
                 {
-                    RegisterBrokenComp(comp, ex);
+                    RegisterBrokenComp(comp, ex, step);
                 }
             }
         }
 
-        private void RegisterBrokenComp(ToolComp comp, Exception ex)
+        private void RegisterBrokenComp(ToolComp comp, Exception ex, string msg = "")
         {
             comp.Broken = true;
-            Logs.LogException(ex);
 
-            if (comp.IsBlock)
+            if (comp.BrokenTick == 0)
             {
-                Logs.WriteLine($"{comp.BlockTool.CustomName} on grid {comp.Grid.DisplayName} is broken!");
-                return;
-            }
+                Logs.LogException(ex);
 
-            Logs.WriteLine($"{comp.HandTool.DefinitionId.SubtypeName} on player {((IMyCharacter)comp.Parent).DisplayName} is broken!");
+                if (comp.IsBlock)
+                    Logs.WriteLine($"{comp.BlockTool.CustomName} on grid {comp.Grid.DisplayName} is broken!");
+                else
+                    Logs.WriteLine($"{comp.HandTool.DefinitionId.SubtypeName} on player {((IMyCharacter)comp.Parent).DisplayName} is broken!");
+            }
+            comp.BrokenTick = Tick;
         }
 
         private void UnregisterBrokenComp(ToolComp comp)
         {
             comp.Broken = false;
+            comp.BrokenTick = 0;
 
             if (comp.IsBlock)
             {
@@ -250,7 +258,7 @@ namespace ToolCore.Session
 
                 if (!comp.Broken)
                 {
-                    Logs.WriteLine($"Location: {def.Location} - Emitter Part Null: {modeData.MuzzlePart == null} - Parent Null: {comp.Parent == null}");
+                    Logs.WriteLine($"Location: {def.Location} - Emitter Part Null: {modeData.MuzzlePart == null} - Parent Null: {comp.Parent == null} - Muzzle Null: {modeData.Muzzle == null}");
                     RegisterBrokenComp(comp, ex);
                 }
             }

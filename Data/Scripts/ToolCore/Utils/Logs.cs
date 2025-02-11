@@ -10,8 +10,9 @@ namespace ToolCore.Utils
         internal const string LOG_PREFIX = "ToolCore";
         internal const string LOG_SUFFIX = ".log";
         internal const int LOGS_TO_KEEP = 5;
-
+        internal static int LOGGED_LINES = 0;
         internal static TextWriter TextWriter;
+        internal static bool PAUSED = false;
 
         internal static void InitLogs()
         {
@@ -51,23 +52,41 @@ namespace ToolCore.Utils
             {
                 using (var write = MyAPIGateway.Utilities.WriteFileInLocalStorage(newName, anyObjectInYourMod))
                 {
-                    write.Write(read.ReadToEnd());
+                    char[] buffer = new char[10000000];
+                    read.ReadBlock(buffer, 0, 10000000);//Limits to approx 10mb
+                    write.Write(buffer.ToString());
                     write.Flush();
                     write.Dispose();
                 }
             }
-
             MyAPIGateway.Utilities.DeleteFileInLocalStorage(oldName, anyObjectInYourMod);
         }
 
         internal static void WriteLine(string text)
         {
-            string line = $"{DateTime.Now:dd-MM-yy HH-mm-ss} - " + text;
+            if (PAUSED) return;
+            if (LOGGED_LINES < 500)
+            {
+                string line = $"{DateTime.Now:dd-MM-yy HH-mm-ss} - " + text;
+                lock (TextWriter)
+                {
+                    LOGGED_LINES++;
+                    TextWriter.WriteLine(line);
+                    TextWriter.Flush();
+                }
+            }
+            else
+                Pause();
+        }
+        internal static void Pause()
+        {
             lock (TextWriter)
             {
-                TextWriter.WriteLine(line);
+                var message = $"{DateTime.Now:dd-MM-yy HH-mm-ss} - Logging Stopped at 500 lines for overflow protection";
+                TextWriter.WriteLine(message);
                 TextWriter.Flush();
             }
+            PAUSED = true;
         }
 
         internal static void Close()
