@@ -390,7 +390,11 @@ namespace ToolCore.Session
                         turret.SelectNewTarget(worldPos);
                     }
 
-                    if (!turret.HasTarget && !turret.HadTarget)
+                    if (turret.HasTarget)
+                        turret.LastTargetTick = Tick;
+
+                    //Delay at least a couple projector updates to ensure no targets before returning home
+                    if (!turret.HasTarget && turret.Part1.DesiredRotation != 0 && turret.LastTargetTick + 200 <= Tick)
                     {
                         turret.GoHome();
                     }

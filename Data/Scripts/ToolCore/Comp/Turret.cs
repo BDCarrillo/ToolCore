@@ -33,6 +33,7 @@ namespace ToolCore.Comp
         internal bool Aligned;
         internal bool IsValid;
         internal int LastRefreshTick;
+        internal int LastTargetTick = int.MaxValue;
 
         internal void UpdateModelData(ToolComp comp)
         {
