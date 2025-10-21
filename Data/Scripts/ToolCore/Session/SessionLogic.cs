@@ -339,6 +339,9 @@ namespace ToolCore.Session
             Vector3D worldPos, worldForward, worldUp;
             CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
 
+            if (modeData.Definition.EffectShape == EffectShape.Cylinder)
+                worldPos = worldPos - worldForward * comp.Values.Length * 0.5f;
+
             var activated = comp.Activated;
             var handToolShooting = !isBlock && comp.HandTool.IsShooting;
             var shooting = activated || handToolShooting || comp.GunBase.Shooting;
@@ -395,6 +398,16 @@ namespace ToolCore.Session
 
                 var part1 = turret.Part1;
                 var diff1 = part1.DesiredRotation - part1.CurrentRotation;
+
+                //Checks for closest angle crossing over +/-Pi
+                if (diff1 > Pi || diff1 < -Pi)
+                {
+                    if (diff1 < -Pi)
+                        diff1 = Pi2 + diff1;
+                    else
+                        diff1 = -(Pi2 - diff1);
+                }
+
                 if (!MyUtils.IsZero(diff1, 0.001f))
                 {
                     var amount = MathHelper.Clamp(diff1, -part1.Definition.RotationSpeed, part1.Definition.RotationSpeed);
@@ -508,7 +521,7 @@ namespace ToolCore.Session
             if (!IsDedicated || workTick && def.EffectShape == EffectShape.Ray)
             {
                 if (def.EffectShape == EffectShape.Cylinder)
-                    MyAPIGateway.Physics.CastRay(worldPos - worldForward * toolValues.Length * 0.5f, worldPos + worldForward * toolValues.Length * 0.5f, out hitInfo);
+                    MyAPIGateway.Physics.CastRay(worldPos, worldPos + worldForward * toolValues.Length, out hitInfo);
                 else if (def.EffectShape == EffectShape.Sphere)
                     MyAPIGateway.Physics.CastRay(worldPos, worldPos + worldForward * toolValues.Length, out hitInfo);
                 else if  (def.EffectShape == EffectShape.Cuboid)
