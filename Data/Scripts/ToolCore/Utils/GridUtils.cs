@@ -192,6 +192,7 @@ namespace ToolCore
         {
             var endOffset = forward * (length / 2);
             var endOffsetAbs = Vector3D.Abs(endOffset);
+            centre = centre + endOffset;
 
             //if (debug)
             //{
