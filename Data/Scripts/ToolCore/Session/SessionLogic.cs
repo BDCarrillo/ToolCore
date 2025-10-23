@@ -469,7 +469,7 @@ namespace ToolCore.Session
                 }
 
                 var angleSqr = diff1 * diff1 + diff2 * diff2;
-                var aligned = turret.HasTarget && angleSqr < turret.Definition.AimingToleranceSqr;
+                var aligned = turret.HasTarget && turret.Part1.DesiredRotation != 0 && angleSqr < turret.Definition.AimingToleranceSqr;
                 if (aligned != turret.Aligned)
                 {
                     turret.Aligned = aligned;
