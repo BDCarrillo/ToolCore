@@ -672,7 +672,8 @@ namespace ToolCore.Session
                                 continue;
                             break;
                         case EffectShape.Cylinder:
-                            var offset = obb.Center - worldPos;
+                            var cylCtr = worldPos + worldForward * toolValues.Length * 0.5;
+                            var offset = obb.Center - cylCtr;
                             var halfEdge = entity.PositionComp.LocalAABB.HalfExtents.AbsMax();
 
                             var radial = Vector3D.ProjectOnPlane(ref offset, ref worldForward);
