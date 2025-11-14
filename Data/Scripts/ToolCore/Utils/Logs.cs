@@ -52,9 +52,7 @@ namespace ToolCore.Utils
             {
                 using (var write = MyAPIGateway.Utilities.WriteFileInLocalStorage(newName, anyObjectInYourMod))
                 {
-                    char[] buffer = new char[10000000];
-                    read.ReadBlock(buffer, 0, 10000000);//Limits to approx 10mb
-                    write.Write(buffer.ToString());
+                    write.Write(read.ReadToEnd());
                     write.Flush();
                     write.Dispose();
                 }

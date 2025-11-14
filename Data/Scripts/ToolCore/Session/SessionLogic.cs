@@ -562,7 +562,7 @@ namespace ToolCore.Session
 
             if (comp.ActiveThreads > 0 || !comp.GridsTask.IsComplete || !comp.CallbackComplete)
                 return;
-
+            //TODO: fix hanging debug draws when block is done/turret is done working
             comp.DrawBoxes.ClearList();
 
             if (def.CacheBlocks && comp.Mode != ToolMode.Drill)
