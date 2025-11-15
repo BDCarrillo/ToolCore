@@ -375,7 +375,7 @@ namespace ToolCore.Session
                         var closing = target.CubeGrid.MarkedForClose || target.FatBlock != null && target.FatBlock.MarkedForClose;
                         var finished = target.IsFullyDismounted || comp.Mode == ToolMode.Weld && projector == null && target.IsFullIntegrity && !target.HasDeformation;
                         var outOfRange = Vector3D.DistanceSquared(target.CubeGrid.GridIntegerToWorld(target.Position), worldPos) > turret.Definition.TargetRadiusSqr;
-                        if (closing || finished || outOfRange || (projector != null && projector.CanBuild(target, true) != BuildCheckResult.OK))
+                        if (closing || finished || outOfRange || (projector != null && projector.CanBuild(target, true) != BuildCheckResult.OK) || !turret.TrackTarget())
                         {
                             turret.DeselectTarget();
                         }
@@ -469,7 +469,7 @@ namespace ToolCore.Session
                 }
 
                 var angleSqr = diff1 * diff1 + diff2 * diff2;
-                var aligned = turret.HasTarget && turret.Part1.DesiredRotation != 0 && angleSqr < turret.Definition.AimingToleranceSqr;
+                var aligned = turret.HasTarget && !part1.OutOfBounds && turret.HasTwoParts ? !turret.Part2.OutOfBounds : true && angleSqr < turret.Definition.AimingToleranceSqr;
                 if (aligned != turret.Aligned)
                 {
                     turret.Aligned = aligned;
