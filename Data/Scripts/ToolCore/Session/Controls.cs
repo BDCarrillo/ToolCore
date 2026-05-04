@@ -117,8 +117,13 @@ namespace ToolCore.Session
             List<IMyTerminalControl> controls;
             MyAPIGateway.TerminalControls.GetControls<T>(out controls);
             foreach (var oldControl in controls)
+            {
                 if (_controlsToHide.Contains(oldControl.Id))
-                    oldControl.Visible = IsFalse;
+                {
+                    var prevVisibleFunc = oldControl.Visible;
+                    oldControl.Visible = block => (prevVisibleFunc?.Invoke(block) ?? true) && NotTcBlock(block);
+                }
+            }
 
             foreach (var control in _customControls)
                 MyAPIGateway.TerminalControls.AddControl<T>(control);
@@ -143,7 +148,10 @@ namespace ToolCore.Session
             foreach (var action in _customActions)
                 MyAPIGateway.TerminalControls.AddAction<T>(action);
         }
-
+        internal bool NotTcBlock(IMyTerminalBlock block)
+        {
+            return !_session.DefinitionMap.ContainsKey(block.BlockDefinition);
+        }
         #region Activate
 
         internal IMyTerminalControlOnOffSwitch ToolShootSwitch<T>() where T : IMyConveyorSorter
