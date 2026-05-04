@@ -26,6 +26,7 @@ using VRage.Utils;
 using VRage.Voxels;
 using VRageMath;
 using static ToolCore.Definitions.ToolDefinition;
+using static VRage.Game.ObjectBuilders.Definitions.MyObjectBuilder_GameDefinition;
 
 namespace ToolCore.Comp
 {
@@ -427,9 +428,9 @@ namespace ToolCore.Comp
             var turret = modeData.Turret;
             var target = turret.HasTarget ? turret.ActiveTarget.FatBlock?.DisplayNameText ?? turret.ActiveTarget.BlockDefinition.DisplayNameText : "None";
 
-            builder.Append("Target: ")
-                .Append(target)
-                .Append("\n");
+            builder.Append($"Target: {target}\n");
+            if (Inventory.VolumeFillFactor > 0.85f)
+                builder.Append($"Check Inventory for Jams!\n");
         }
 
         internal class ModeSpecificData
@@ -993,7 +994,7 @@ namespace ToolCore.Comp
                     //TODO see if it's possible to invoke the vanilla "inventory full"
 
                 }
-
+                //TODO Grinder inventory updates?
                 Yields.Clear();
             }
         }
