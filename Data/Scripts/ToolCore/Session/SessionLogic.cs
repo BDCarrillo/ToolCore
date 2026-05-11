@@ -781,6 +781,13 @@ namespace ToolCore.Session
                         minExtent = Vector3I.Round(localCentre - box.HalfExtents);
                         maxExtent = Vector3I.Round(localCentre + box.HalfExtents);
                     }
+                    else if (def.EffectShape == EffectShape.Cylinder)
+                    {
+                        //TODO more efficiently bound the cylinder in the box
+                        var offset = Math.Max(toolValues.Length, toolValues.Radius);
+                        minExtent = Vector3I.Round(localCentre - offset);
+                        maxExtent = Vector3I.Round(localCentre + offset);
+                    }
                     else
                     {
                         var drillRadius = toolValues.BoundingRadius;

@@ -30,6 +30,12 @@ namespace ToolCore.Session
             "addToSelectionButton",
             "SearchField",
         };
+        private readonly HashSet<string> _actionssToHide = new HashSet<string>()
+        {
+            "DrainAll",
+            "DrainAll_On",
+            "DrainAll_Off"
+        };
 
         private readonly List<MyTerminalControlComboBoxItem> _modeList = new List<MyTerminalControlComboBoxItem>();
         private readonly List<MyTerminalControlComboBoxItem> _actionList = new List<MyTerminalControlComboBoxItem>();
@@ -66,12 +72,19 @@ namespace ToolCore.Session
 
             if (_session.DefinitionMap.ContainsKey(block.BlockDefinition))
             {
-                actions.RemoveAt(13);
+                for (int i = 0; i < actions.Count; i++)
+                {
+                    var action = actions[i];
+                    if (_actionssToHide.Contains(action.Id))
+                    {
+                        actions.Remove(action);
+                        i--;
+                    }
+                }
                 return;
             }
 
-            int index;
-            for (index = 0; index < actions.Count; index++)
+            for (int index = 0; index < actions.Count; index++)
             {
                 var action = actions[index];
                 if (action.Id == SHOOT_ACTION)
