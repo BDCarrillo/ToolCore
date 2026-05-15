@@ -104,8 +104,6 @@ namespace ToolCore.Session
                 return;
             }
 
-            _customControls.Add(Separator<T>());
-
             _customControls.Add(ToolShootSwitch<T>());
             _customControls.Add(ToolTrackTargetsSwitch<T>());
 
@@ -113,14 +111,14 @@ namespace ToolCore.Session
             _customControls.Add(SelectAction<T>());
             _customControls.Add(DrawSwitch<T>());
 
-            _customControls.Add(Separator<T>());
+            _customControls.Add(SeparatorTurret<T>());
 
             _customControls.Add(ToolTargetOwn<T>());
             _customControls.Add(ToolTargetFriendly<T>());
             _customControls.Add(ToolTargetNeutral<T>());
             _customControls.Add(ToolTargetHostile<T>());
 
-            _customControls.Add(Separator<T>());
+            _customControls.Add(SeparatorTurret<T>());
 
             _customControls.Add(UseWorkColourSwitch<T>());
             _customControls.Add(SelectWorkColour<T>());
@@ -176,7 +174,7 @@ namespace ToolCore.Session
             control.OffText = MyStringId.GetOrCompute("Off");
             control.Getter = GetActivated;
             control.Setter = SetActivated;
-            control.Visible = IsTrue;
+            control.Visible = IsTCBlock;
             control.Enabled = IsFunctional;
 
             return control;
@@ -543,7 +541,7 @@ namespace ToolCore.Session
             control.OffText = MyStringId.GetOrCompute("Off");
             control.Getter = GetDraw;
             control.Setter = SetDraw;
-            control.Visible = IsTrue;
+            control.Visible = IsTCBlock;
             control.Enabled = IsFunctional;
 
             return control;
@@ -615,7 +613,17 @@ namespace ToolCore.Session
             var c = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlSeparator, T>("ToolCore_Separator");
 
             c.Enabled = IsTrue;
-            c.Visible = IsTrue;
+            c.Visible = IsTCBlock;
+
+            return c;
+        }
+
+        internal IMyTerminalControlSeparator SeparatorTurret<T>() where T : IMyTerminalBlock
+        {
+            var c = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlSeparator, T>("ToolCore_Separator");
+
+            c.Enabled = IsTrue;
+            c.Visible = ShowTargetControls;
 
             return c;
         }
@@ -652,9 +660,9 @@ namespace ToolCore.Session
             return true;
         }
 
-        internal bool IsFalse(IMyTerminalBlock block)
-        {
-            return false;
+        internal bool IsTCBlock(IMyTerminalBlock block)
+        { 
+            return _session.DefinitionMap.ContainsKey(block.BlockDefinition);
         }
 
         #endregion

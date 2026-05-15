@@ -338,7 +338,7 @@ namespace ToolCore.Session
             if (IsServer && comp.Mode != ToolMode.Weld && needsPushing)
                 comp.ManageInventory(worldPos, worldForward, worldUp);
 
-            if (modeData.Definition.EffectShape == EffectShape.Cylinder)
+            if (modeData.Definition.EffectShape == EffectShape.Cylinder && modeData.Definition.Location != Location.Centre)
                 worldPos = worldPos - worldForward * comp.Values.Length * 0.5f;
 
             var activated = comp.Activated;

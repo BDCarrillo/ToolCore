@@ -276,7 +276,7 @@ namespace ToolCore
                 var radius = toolValues.Radius;
                 var length = toolValues.Length;
 
-                var lenPlusSqr = Math.Pow(length + 0.5f, 2);
+                var lenPlusSqr = def.Location == Location.Centre ? Math.Pow(length / 2 + 0.5f, 2) : Math.Pow(length + 0.5f, 2);
                 var lenMinusSqr = Math.Pow(length - 0.5f, 2);
                 var radiusPlusSqr = (float)Math.Pow(radius + 0.5f, 2);
                 var radiusMinusSqr = (float)Math.Pow(radius - 0.5f, 2);
