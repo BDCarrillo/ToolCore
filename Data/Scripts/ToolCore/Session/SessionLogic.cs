@@ -206,6 +206,7 @@ namespace ToolCore.Session
                 switch (def.Location)
                 {
                     case Location.Emitter:
+                    case Location.Hit:
                         var partMatrix = modeData.MuzzlePart.PositionComp.WorldMatrixRef;
                         var muzzleMatrix = (MatrixD)modeData.Muzzle.Matrix;
 
@@ -523,11 +524,7 @@ namespace ToolCore.Session
             IHitInfo hitInfo = null;
             if (!IsDedicated || workTick && (def.EffectShape == EffectShape.Ray || def.Location == Location.Hit))
             {
-                if (def.EffectShape == EffectShape.Cylinder)
-                    MyAPIGateway.Physics.CastRay(worldPos, worldPos + worldForward * toolValues.Length, out hitInfo);
-                else if (def.EffectShape == EffectShape.Sphere)
-                    MyAPIGateway.Physics.CastRay(worldPos, worldPos + worldForward * toolValues.Length, out hitInfo);
-                else if  (def.EffectShape == EffectShape.Cuboid)
+                if  (def.EffectShape == EffectShape.Cuboid)
                     MyAPIGateway.Physics.CastRay(worldPos - worldForward * toolValues.Length * 0.707f, worldPos + worldForward * toolValues.Length * 0.707f, out hitInfo);
                 else
                     MyAPIGateway.Physics.CastRay(worldPos, worldPos + worldForward * toolValues.Length, out hitInfo);
