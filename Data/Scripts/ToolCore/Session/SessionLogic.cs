@@ -521,7 +521,7 @@ namespace ToolCore.Session
 
             // Initial raycast?
             IHitInfo hitInfo = null;
-            if (!IsDedicated || workTick && def.EffectShape == EffectShape.Ray)
+            if (!IsDedicated || workTick && (def.EffectShape == EffectShape.Ray || def.Location == Location.Hit))
             {
                 if (def.EffectShape == EffectShape.Cylinder)
                     MyAPIGateway.Physics.CastRay(worldPos, worldPos + worldForward * toolValues.Length, out hitInfo);
