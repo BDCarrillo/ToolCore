@@ -208,17 +208,9 @@ namespace ToolCore.Session
                     case Location.Emitter:
                     case Location.Hit:
                         var partMatrix = modeData.MuzzlePart.PositionComp.WorldMatrixRef;
-                        var muzzleMatrix = (MatrixD)modeData.Muzzle.Matrix;
-
-                        var localPos = muzzleMatrix.Translation;
-                        var muzzleForward = Vector3D.Normalize(muzzleMatrix.Forward);
-                        var muzzleUp = Vector3D.Normalize(muzzleMatrix.Up);
-
-                        if (!Vector3D.IsZero(def.Offset))
-                        {
-                            localPos += def.Offset;
-                        }
-
+                        var localPos = modeData.cachedDummyMatrix.Translation + def.Offset;
+                        var muzzleForward = modeData.cachedDummyMatrix.Forward;
+                        var muzzleUp = modeData.cachedDummyMatrix.Up;
                         Vector3D.Transform(ref localPos, ref partMatrix, out worldPos);
                         Vector3D.TransformNormal(ref muzzleForward, ref partMatrix, out worldForward);
                         Vector3D.TransformNormal(ref muzzleUp, ref partMatrix, out worldUp);
@@ -250,6 +242,10 @@ namespace ToolCore.Session
                         worldUp = Vector3D.Up;
                         break;
                 }
+                comp.LastWorldVectorCalcTick = Tick;
+
+                if (modeData.Definition.EffectShape == EffectShape.Cylinder && modeData.Definition.Location != Location.Centre)
+                    worldPos = worldPos - worldForward * comp.Values.Length * 0.5f;
             }
             catch (Exception ex)
             {
@@ -331,16 +327,23 @@ namespace ToolCore.Session
 
             if (isBlock && !block.Enabled)
                 return;
-            Vector3D worldPos, worldForward, worldUp;
-            CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
+            var worldPos = Vector3D.Zero;
+            var worldForward = Vector3D.Zero;
+            var worldUp = Vector3D.Zero;
+            //CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
 
             var fill = comp.Inventory.VolumeFillFactor;
             var needsPushing = comp.IsBlock ? comp.CompTick60 == TickMod60 && (fill > 0f || comp.Yields.Count > 0) : comp.CompTick60 == TickMod60 && comp.Yields.Count > 0;
             if (IsServer && comp.Mode != ToolMode.Weld && needsPushing)
-                comp.ManageInventory(worldPos, worldForward, worldUp);
-
-            if (modeData.Definition.EffectShape == EffectShape.Cylinder && modeData.Definition.Location != Location.Centre)
-                worldPos = worldPos - worldForward * comp.Values.Length * 0.5f;
+            {
+                if (comp.IsBlock)
+                    comp.ManageBlockInventory();
+                else
+                {
+                    CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
+                    comp.ManageHandInventory(worldPos, worldForward, worldUp);
+                }
+            }
 
             var activated = comp.Activated;
             var handToolShooting = !isBlock && comp.HandTool.IsShooting;
@@ -349,6 +352,7 @@ namespace ToolCore.Session
             var turretAligned = false;
             if (isTurret && comp.TrackTargets)
             {
+                CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
                 var dirty = comp.TargetsDirty || turret.Targets.Count < 1;
                 if (dirty && comp.GridsTask.IsComplete && comp.CallbackComplete)
                 {
@@ -519,7 +523,8 @@ namespace ToolCore.Session
             }
 
             var toolValues = comp.Values;
-
+            if (comp.LastWorldVectorCalcTick != Tick)
+                CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
             // Initial raycast?
             IHitInfo hitInfo = null;
             if (!IsDedicated || workTick && (def.EffectShape == EffectShape.Ray || def.Location == Location.Hit))
