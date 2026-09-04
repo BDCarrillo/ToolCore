@@ -160,6 +160,9 @@ namespace ToolCore.Comp
                 if (_activated == value)
                     return;
 
+                if (value && !Powered && IsBlock)
+                    IsPowered(); //Powered is polled, may be stale
+
                 if (value && !(Functional && Powered && Enabled))
                     return;
 

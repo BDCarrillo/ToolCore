@@ -110,7 +110,7 @@ namespace ToolCore.Comp
                 status = MyGunStatusEnum.Disabled;
                 return false;
             }
-            if (!_comp.Powered)
+            if (!_comp.Powered && (!_comp.IsBlock || !_comp.IsPowered())) //Powered is polled, may be stale
             {
                 status = MyGunStatusEnum.OutOfPower;
                 return false;
