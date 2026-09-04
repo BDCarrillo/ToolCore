@@ -161,8 +161,8 @@ namespace ToolCore.Comp
                 if (_activated == value)
                     return;
 
-                if (value && !Powered && IsBlock)
-                    IsPowered(); //Powered is polled, may be stale
+                if (value && !Powered && IsBlock && Functional && Enabled && IsPowered())
+                    UpdateAvState(Trigger.Powered, true); //Powered is polled, may be stale
 
                 if (value && !(Functional && Powered && Enabled))
                     return;

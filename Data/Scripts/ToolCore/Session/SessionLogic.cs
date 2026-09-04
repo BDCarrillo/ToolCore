@@ -54,7 +54,7 @@ namespace ToolCore.Session
                         //Same slot as needsPushing, and 20|60 keeps the power poll alive.
                         //Activated alone doesn't hold full rate - it latches through off/unpowered.
                         //Activated-but-idle comps drop to their CompTick20 slot, which for
-                        //20-divisible intervals is exactly their workTick (see ctor).
+                        //20-divisible intervals covers every workTick (see ctor).
                         if (gate && comp.CompTick60 != tickMod60
                             && (!(comp.Activated && comp.Enabled && comp.Powered && comp.Functional)
                                 || comp.AlignedUpdateInterval && comp.CompTick20 != tickMod20)
