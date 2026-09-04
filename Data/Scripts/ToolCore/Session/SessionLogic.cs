@@ -30,6 +30,7 @@ namespace ToolCore.Session
             {
                 var gate = IsDedicated;
                 var tickMod60 = TickMod60;
+                var tickMod20 = TickMod20;
                 for (int i = 0; i < GridList.Count; i++)
                 {
                     var gridComp = GridList[i];
@@ -52,8 +53,11 @@ namespace ToolCore.Session
                         //DS only: idle comps run once a second on their CompTick60 slot.
                         //Same slot as needsPushing, and 20|60 keeps the power poll alive.
                         //Activated alone doesn't hold full rate - it latches through off/unpowered.
+                        //Activated-but-idle comps drop to their CompTick20 slot, which for
+                        //20-divisible intervals is exactly their workTick (see ctor).
                         if (gate && comp.CompTick60 != tickMod60
-                            && !(comp.Activated && comp.Enabled && comp.Powered && comp.Functional)
+                            && (!(comp.Activated && comp.Enabled && comp.Powered && comp.Functional)
+                                || comp.AlignedUpdateInterval && comp.CompTick20 != tickMod20)
                             && !comp.GunBase.WantsToShoot && !comp.GunBase.Shooting
                             && !comp.TrackTargets && !comp.WasHitting && !comp.Working
                             && !comp.UpdatePower && !comp.Dirty && !comp.Broken && comp.FullInit)
