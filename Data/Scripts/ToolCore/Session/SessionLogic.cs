@@ -138,7 +138,7 @@ namespace ToolCore.Session
         private void DrawComp(ToolComp comp)
         {
             Vector3D worldPos, worldForward, worldUp;
-            CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
+            CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp, true);
 
             var toolValues = comp.Values;
             var modeData = comp.ModeData;
@@ -195,7 +195,7 @@ namespace ToolCore.Session
             comp.Working = false;
         }
 
-        private void CalculateWorldVectors(ToolComp comp, out Vector3D worldPos, out Vector3D worldForward, out Vector3D worldUp)
+        private void CalculateWorldVectors(ToolComp comp, out Vector3D worldPos, out Vector3D worldForward, out Vector3D worldUp, bool draw = false)
         {
             var modeData = comp.ModeData;
             var def = modeData.Definition;
@@ -244,7 +244,7 @@ namespace ToolCore.Session
                 }
                 comp.LastWorldVectorCalcTick = Tick;
 
-                if (modeData.Definition.EffectShape == EffectShape.Cylinder && modeData.Definition.Location != Location.Centre)
+                if (!draw && modeData.Definition.EffectShape == EffectShape.Cylinder && modeData.Definition.Location != Location.Centre)
                     worldPos = worldPos - worldForward * comp.Values.Length * 0.5f;
             }
             catch (Exception ex)
@@ -330,7 +330,6 @@ namespace ToolCore.Session
             var worldPos = Vector3D.Zero;
             var worldForward = Vector3D.Zero;
             var worldUp = Vector3D.Zero;
-            //CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
 
             var fill = comp.Inventory.VolumeFillFactor;
             var needsPushing = comp.IsBlock ? comp.CompTick60 == TickMod60 && (fill > 0f || comp.Yields.Count > 0) : comp.CompTick60 == TickMod60 && comp.Yields.Count > 0;
