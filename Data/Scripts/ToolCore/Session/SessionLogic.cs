@@ -8,7 +8,6 @@ using ToolCore.Comp;
 using ToolCore.Definitions;
 using ToolCore.Definitions.Serialised;
 using ToolCore.Utils;
-using VRage;
 using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
@@ -66,7 +65,7 @@ namespace ToolCore.Session
             var step = "";
             try
             {
-                var modeData = comp.ModeData;
+                var modeData = comp.ModeMap[comp.Mode];
                 var def = modeData.Definition;
                 step = "UpdateTool";
 
@@ -197,20 +196,20 @@ namespace ToolCore.Session
 
         private void CalculateWorldVectors(ToolComp comp, out Vector3D worldPos, out Vector3D worldForward, out Vector3D worldUp, bool draw = false)
         {
-            var modeData = comp.ModeData;
+            var modeData = comp.ModeMap[comp.Mode];
             var def = modeData.Definition;
             var pos = comp.ToolEntity.PositionComp;
-
             try
             {
                 switch (def.Location)
                 {
                     case Location.Emitter:
                     case Location.Hit:
+                        var matrix = modeData.cachedDummyMatrix;
                         var partMatrix = modeData.MuzzlePart.PositionComp.WorldMatrixRef;
-                        var localPos = modeData.cachedDummyMatrix.Translation + def.Offset;
-                        var muzzleForward = modeData.cachedDummyMatrix.Forward;
-                        var muzzleUp = modeData.cachedDummyMatrix.Up;
+                        var localPos = matrix.Translation + def.Offset;
+                        var muzzleForward = matrix.Forward;
+                        var muzzleUp = matrix.Up;
                         Vector3D.Transform(ref localPos, ref partMatrix, out worldPos);
                         Vector3D.TransformNormal(ref muzzleForward, ref partMatrix, out worldForward);
                         Vector3D.TransformNormal(ref muzzleUp, ref partMatrix, out worldUp);
@@ -244,8 +243,12 @@ namespace ToolCore.Session
                 }
                 comp.LastWorldVectorCalcTick = Tick;
 
-                if (!draw && modeData.Definition.EffectShape == EffectShape.Cylinder && modeData.Definition.Location != Location.Centre)
-                    worldPos = worldPos - worldForward * comp.Values.Length * 0.5f;
+                if (!draw && def.EffectShape == EffectShape.Cylinder && def.Location != Location.Centre)
+                {
+                    var action = comp.GunBase.Shooting ? comp.GunBase.GunAction : comp.Action;
+                    var len = modeData.Definition.ActionMap[action].Length;
+                    worldPos = worldPos - worldForward * len * 0.5f;
+                }
             }
             catch (Exception ex)
             {
@@ -263,7 +266,7 @@ namespace ToolCore.Session
 
         private void UpdateTool(ToolComp comp)
         {
-            var modeData = comp.ModeData;
+            var modeData = comp.ModeMap[comp.Mode];
             var def = modeData.Definition;
             var tickModUpdate = Tick % def.UpdateInterval;
             var workTick = modeData.WorkTick == tickModUpdate;
@@ -298,7 +301,7 @@ namespace ToolCore.Session
 
             if (!comp.FullInit)
                 comp.FunctionalInit();
-
+            //TODO:  Push power state to sink events rather than constantly polling
             if (isBlock && (comp.UpdatePower || comp.CompTick20 == TickMod20))
             {
                 var wasPowered = comp.Powered;
@@ -316,7 +319,6 @@ namespace ToolCore.Session
                 }
                 comp.UpdatePower = false;
             }
-
             if (!comp.Powered || !isBlock && ((IMyCharacter)comp.Parent).SuitEnergyLevel <= 0)
                 return;
 
@@ -343,8 +345,7 @@ namespace ToolCore.Session
                     comp.ManageHandInventory(worldPos, worldForward, worldUp);
                 }
             }
-
-            var activated = comp.Activated;
+            var activated = comp._activated;
             var handToolShooting = !isBlock && comp.HandTool.IsShooting;
             var shooting = activated || handToolShooting || comp.GunBase.Shooting;
 
@@ -494,7 +495,7 @@ namespace ToolCore.Session
 
             if (!shooting && !turretAligned)
                 return;
-
+            //TODO:  This is expensive
             if (activated)
             {
                 if (!MySessionComponentSafeZones.IsActionAllowed(comp.Parent, CastHax(MySessionComponentSafeZones.AllowedActions, (int)comp.Mode)))
@@ -520,8 +521,7 @@ namespace ToolCore.Session
                     }
                 }
             }
-
-            var toolValues = comp.Values;
+            var toolValues = modeData.Definition.ActionMap[comp.GunBase.Shooting ? comp.GunBase.GunAction : comp.Action];
             if (comp.LastWorldVectorCalcTick != Tick)
                 CalculateWorldVectors(comp, out worldPos, out worldForward, out worldUp);
             // Initial raycast?

@@ -150,7 +150,7 @@ namespace ToolCore.Comp
             }
         }
 
-        private bool _activated;
+        internal bool _activated;
 
         internal bool Activated
         {
