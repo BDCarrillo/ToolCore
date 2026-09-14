@@ -42,10 +42,23 @@ namespace ToolCore.Session
                     }
                 } //Grids loop
 
+                var dedicated = IsDedicated;
+                var tickMod60 = TickMod60;
+                var tickMod20 = TickMod20;
                 foreach (var comp in ToolMap.Values)
                 {
                     if (comp.Entity == null || comp.Entity.Closed || comp.Entity.MarkedForClose || (comp.IsBlock && comp.Grid != null && comp.Grid.MarkedForClose))
                         continue;
+
+                    //DS: idle block tools update on CompTick60, activated-idle on CompTick20
+                    if (dedicated && comp.IsBlock && comp.CompTick60 != tickMod60
+                        && (!(comp._activated && comp.Enabled && comp.Powered && comp.Functional)
+                            || comp.AlignedUpdateInterval && comp.CompTick20 != tickMod20)
+                        && !comp.GunBase.WantsToShoot && !comp.GunBase.Shooting
+                        && !comp._trackTargets && !comp.WasHitting && !comp.Working
+                        && !comp.UpdatePower && !comp.Dirty && !comp.Broken && comp.FullInit)
+                        continue;
+
                     var step = "";
                     try
                     {
@@ -113,8 +126,7 @@ namespace ToolCore.Session
                             var worldForward = Vector3D.Zero;
                             var worldUp = Vector3D.Zero;
 
-                            var fill = comp.Inventory.VolumeFillFactor;
-                            var needsPushing = comp.IsBlock ? comp.CompTick60 == TickMod60 && (fill > 0f || comp.Yields.Count > 0) : comp.CompTick60 == TickMod60 && comp.Yields.Count > 0;
+                            var needsPushing = comp.CompTick60 == TickMod60 && (comp.IsBlock ? comp.Inventory.VolumeFillFactor > 0f || comp.Yields.Count > 0 : comp.Yields.Count > 0);
                             if (IsServer && comp.Mode != ToolMode.Weld && needsPushing)
                             {
                                 if (comp.IsBlock)

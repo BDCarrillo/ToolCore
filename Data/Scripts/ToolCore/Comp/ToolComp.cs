@@ -77,6 +77,7 @@ namespace ToolCore.Comp
         internal readonly HashSet<string> FailedPushes = new HashSet<string>();
 
         internal readonly bool IsBlock;
+        internal readonly bool AlignedUpdateInterval;
         internal readonly bool HasTargetControls;
 
         internal bool Enabled = true;
@@ -127,6 +128,7 @@ namespace ToolCore.Comp
         internal int BrokenTick;
         internal int LastWorldVectorCalcTick;
         internal int LastGridsTaskTick;
+        internal int LastPowerRefreshTick = -1;
 
         internal volatile bool CallbackComplete = true;
         internal volatile int MaxLayer;
@@ -143,6 +145,9 @@ namespace ToolCore.Comp
             {
                 if (_activated == value)
                     return;
+
+                if (value && !Powered && Functional && Enabled)
+                    RefreshPowered();
 
                 if (value && !(Functional && Powered && Enabled))
                     return;
@@ -166,8 +171,10 @@ namespace ToolCore.Comp
             GunBase = new CoreGun(this);
 
             var debug = false;
+            AlignedUpdateInterval = true;
             foreach (var def in defs)
             {
+                AlignedUpdateInterval &= def.UpdateInterval % 20 == 0;
                 var workTick = (int)(ToolEntity.EntityId % def.UpdateInterval);
                 var data = new ModeSpecificData(def, workTick);
 
@@ -700,6 +707,19 @@ namespace ToolCore.Comp
                 effects.SoundStopped = false;
                 effects.Restart = true;
             }
+        }
+
+        //Powered is polled, may be stale
+        internal bool RefreshPowered()
+        {
+            if (Powered || !IsBlock || LastPowerRefreshTick == ToolSession.Tick)
+                return Powered;
+
+            LastPowerRefreshTick = ToolSession.Tick;
+            if (IsPowered())
+                UpdateAvState(Trigger.Powered, true);
+
+            return Powered;
         }
 
         internal bool IsPowered()
