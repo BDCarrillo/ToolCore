@@ -76,7 +76,7 @@ namespace ToolCore.Session
                                 comp.Dirty = true;
                             }
 
-                            if (isBlock && comp.Grid != block.CubeGrid)
+                            if (isBlock && (comp.Grid != block.CubeGrid || comp.GridComp == null))
                                 comp.ChangeGrid();
 
                             if (!comp.Functional)
@@ -280,8 +280,11 @@ namespace ToolCore.Session
                             {
                                 if (comp.GridComp.LastSafezoneTick != Tick)
                                     comp.GridComp.UpdateGridSafezone();
-                                comp.Activated = comp.GridComp.SZAllowed[(int)comp.Mode];
-                                break;
+                                if (!comp.GridComp.SZAllowed[(int)comp.Mode])
+                                {
+                                    comp.Activated = false;
+                                    break;
+                                }
                             }
                             else if (activated && !comp.IsBlock && !MySessionComponentSafeZones.IsActionAllowed(comp.Parent, CastHax(MySessionComponentSafeZones.AllowedActions, (int)comp.Mode)))
                             {
