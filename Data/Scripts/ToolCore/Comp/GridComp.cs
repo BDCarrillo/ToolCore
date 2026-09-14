@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ToolCore.Session;
 using ToolCore.Utils;
 using VRage.Game.ModAPI;
+using static VRage.Game.ObjectBuilders.Definitions.MyObjectBuilder_GameDefinition;
 
 namespace ToolCore.Comp
 {
@@ -21,7 +22,8 @@ namespace ToolCore.Comp
         internal long CompTick20;
         internal long LastSafezoneTick = 0;
 
-        internal bool NearSafezone;
+        internal Dictionary<int, bool> SZAllowed = new Dictionary<int, bool>() { { 4, false }, { 8, false }, {16, false }};
+
         internal bool UnderControl;
         internal bool Dirty;
 
@@ -49,7 +51,6 @@ namespace ToolCore.Comp
                 if (block is IMyConveyorSorter)
                     FatBlockAdded(block);
             }
-
         }
 
         internal void Clean()
@@ -86,8 +87,9 @@ namespace ToolCore.Comp
         internal void UpdateGridSafezone()
         {
             LastSafezoneTick = ToolSession.Tick;
-            var nearby = MySessionComponentSafeZones.GetSafeZonesInAABB(Grid.PositionComp.WorldAABB);
-            NearSafezone = nearby.Count > 0;
+            SZAllowed[4] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, 4));
+            SZAllowed[8] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, 8));
+            SZAllowed[16] = MySessionComponentSafeZones.IsActionAllowed(Grid, Utils.Utils.CastHax(MySessionComponentSafeZones.AllowedActions, 16));
         }
 
         private void FatBlockRemoved(MyCubeBlock block)
@@ -97,7 +99,6 @@ namespace ToolCore.Comp
                 ToolComp comp;
                 if (ToolSession.Instance.ToolMap.TryGetValue(block.EntityId, out comp) && comp?.GunBase != null && ToolComps.Remove(comp))
                 {
-                    ToolSession.Instance.ToolMap.Remove(block.EntityId);
                     if (!Grid.MarkedForClose)
                     {
                         var weaponSystem = ((IMyCubeGrid)Grid).WeaponSystem;

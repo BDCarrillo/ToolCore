@@ -83,8 +83,6 @@ namespace ToolCore.Session
                 Settings.LoadConfigFile();
                 LoadSettings(Settings.CoreSettings);
             }
-            //Controls.CreateTerminalControls<IMyConveyorSorter>();
-
         }
 
         public override void UpdateBeforeSimulation()
@@ -112,9 +110,6 @@ namespace ToolCore.Session
                     InitPlayers();
                 FirstRun = false;
             }
-
-            //if (Tick20 && BlockLimits.TrackPCU && AggregatorTask.IsComplete)
-            //    AggregatorTask = MyAPIGateway.Parallel.Start(BlockLimits.AggregateStatsParallel);
         }
 
         public override void UpdateAfterSimulation()

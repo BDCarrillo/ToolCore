@@ -25,8 +25,6 @@ using VRage.ObjectBuilders;
 using VRage.Utils;
 using VRage.Voxels;
 using VRageMath;
-using static ToolCore.Definitions.ToolDefinition;
-using static VRage.Game.ObjectBuilders.Definitions.MyObjectBuilder_GameDefinition;
 
 namespace ToolCore.Comp
 {
@@ -865,11 +863,9 @@ namespace ToolCore.Comp
                 var itemDef = MyDefinitionManager.Static.GetPhysicalItemDefinition(oreOb);
                 var itemVol = itemDef.Volume;
                 var amount = (MyFixedPoint)(gross / itemDef.Volume);
-                //Logs.WriteLine($"Holding {amount} ore");
 
                 MyFixedPoint transferred;
                 Grid.ConveyorSystem.PushGenerateItem(itemDef.Id, amount, out transferred, BlockTool, false);
-                //Logs.WriteLine($"Pushed {transferred}");
 
                 amount -= transferred;
                 if (amount == MyFixedPoint.Zero)
@@ -897,7 +893,6 @@ namespace ToolCore.Comp
                     session.TempItems[ore] = (float)amount * itemVol;
                 }
                 Inventory.AddItems(toAdd, oreOb);
-                //Logs.WriteLine($"Added {toAdd}");
             }
 
             Yields.Clear();
@@ -1044,6 +1039,7 @@ namespace ToolCore.Comp
                 ToolSession.Instance.Networking.SendPacketToServer(new ReplicationPacket { EntityId = ToolEntity.EntityId, Add = false, PacketType = (byte)PacketType.Replicate });
 
             Clean();
+            ToolSession.Instance.ToolMap.Remove(ToolEntity.EntityId);
 
             if (IsBlock)
             {
@@ -1055,8 +1051,6 @@ namespace ToolCore.Comp
 
                 return;
             }
-
-            ToolSession.Instance.ToolMap.Remove(ToolEntity.EntityId);
         }
 
         internal void Clean()
