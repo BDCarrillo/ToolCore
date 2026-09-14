@@ -134,21 +134,7 @@ namespace ToolCore.Comp
         internal volatile int MaxLayer;
 
         internal uint WorkColourPacked;
-
-        private Vector3 _workColour;
-        internal Vector3 WorkColour
-        {
-            get
-            {
-                return _workColour;
-            }
-            set
-            {
-                _workColour = value;
-
-                WorkColourPacked = _workColour.PackHSVToUint();
-            }
-        }
+        internal Vector3 WorkColour;
 
         internal bool _activated;
 
@@ -171,24 +157,6 @@ namespace ToolCore.Comp
                     //WasHitting = false;
                     UpdateHitInfo(false);
                 }
-            }
-        }
-
-        internal ActionDefinition Values
-        {
-            get
-            {
-                var action = GunBase.Shooting ? GunBase.GunAction : Action;
-                var modeData = ModeMap[Mode];
-                return modeData.Definition.ActionMap[action];
-            }
-        }
-
-        internal ModeSpecificData ModeData
-        {
-            get
-            {
-                return ModeMap[Mode];
             }
         }
 
@@ -421,7 +389,7 @@ namespace ToolCore.Comp
 
         private void AppendingCustomData(IMyTerminalBlock block, StringBuilder builder)
         {
-            var modeData = ModeData;
+            var modeData = ModeMap[Mode];
             if (modeData.Turret == null)
                 return;
 
@@ -673,9 +641,9 @@ namespace ToolCore.Comp
         internal void UpdateAvState(Trigger state, bool add)
         {
             //Logs.WriteLine($"UpdateAvState() {state} {add} {force}");
-            var data = ModeData;
+            var data = ModeMap[Mode];
 
-            var keepFiring = !add && (Activated || GunBase.Shooting) && (state & Trigger.Firing) > 0;
+            var keepFiring = !add && (_activated || GunBase.Shooting) && (state & Trigger.Firing) > 0;
 
             foreach (var flag in ToolSession.Instance.Triggers)
             {
@@ -712,7 +680,7 @@ namespace ToolCore.Comp
             if (ToolSession.Instance.IsDedicated) return; //TEMPORARY!!! or not?
 
             Effects effects;
-            if (!ModeData.EffectsMap.TryGetValue(state, out effects))
+            if (!ModeMap[Mode].EffectsMap.TryGetValue(state, out effects))
                 return;
 
             if (!add)
@@ -808,7 +776,7 @@ namespace ToolCore.Comp
         {
             var sinkInfo = new MyResourceSinkInfo()
             {
-                MaxRequiredInput = ModeData.Definition.ActivePower,
+                MaxRequiredInput = ModeMap[Mode].Definition.ActivePower,
                 RequiredInputFunc = RequiredInput,
                 ResourceTypeId = MyResourceDistributorComponent.ElectricityId
             };
@@ -842,10 +810,10 @@ namespace ToolCore.Comp
             if (!Functional || !Enabled)
                 return 0f;
 
-            if (Activated || Working || GunBase.WantsToShoot)
-                return ModeData.Definition.ActivePower;
+            if (_activated || Working || GunBase.WantsToShoot)
+                return ModeMap[Mode].Definition.ActivePower;
 
-            return ModeData.Definition.IdlePower;
+            return ModeMap[Mode].Definition.IdlePower;
         }
 
         internal void OnDrillComplete(WorkData data)
@@ -872,7 +840,7 @@ namespace ToolCore.Comp
             ActiveThreads--;
             if (ActiveThreads > 0) return;
 
-            var isHitting = Functional && Powered && Enabled && Working && (Activated || GunBase.Shooting);
+            var isHitting = Functional && Powered && Enabled && Working && (_activated || GunBase.Shooting);
             if (isHitting != WasHitting)
             {
                 UpdateAvState(Trigger.Hit, isHitting);
@@ -1066,6 +1034,7 @@ namespace ToolCore.Comp
             Targets = (TargetTypes)repo.Targets;
             UseWorkColour = repo.UseWorkColour;
             WorkColour = repo.WorkColour;
+            WorkColourPacked = WorkColour.PackHSVToUint();
             TrackTargets = repo.TrackTargets;
         }
 
@@ -1087,7 +1056,7 @@ namespace ToolCore.Comp
                 return;
             }
 
-            ToolSession.Instance.HandTools.Remove(this);
+            ToolSession.Instance.ToolMap.Remove(ToolEntity.EntityId);
         }
 
         internal void Clean()
