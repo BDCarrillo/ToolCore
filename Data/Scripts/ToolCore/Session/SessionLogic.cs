@@ -49,7 +49,9 @@ namespace ToolCore.Session
                     try
                     {
                         step = "UpdateTool";
- #region UpdateTool
+                        #region UpdateTool
+                        if (comp.Entity == null || comp.Entity.Closed || comp.Entity.MarkedForClose || (comp.IsBlock && comp.Grid != null && comp.Grid.MarkedForClose))
+                            continue;
                         var modeData = comp.ModeMap[comp.Mode];
                         var def = modeData.Definition;
                         var tickModUpdate = Tick % def.UpdateInterval;
