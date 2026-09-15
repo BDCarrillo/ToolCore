@@ -24,6 +24,11 @@ namespace ToolCore.Session
 {
     internal partial class ToolSession
     {
+        private static readonly MyStringHash RockHash = MyStringHash.GetOrCompute("Rock");
+        private static readonly MyStringHash CharacterHash = MyStringHash.GetOrCompute("Character");
+        private static readonly MyStringHash TreeHash = MyStringHash.GetOrCompute("Tree");
+        private static readonly MyStringHash MetalHash = MyStringHash.GetOrCompute("Metal");
+
         internal void CompLoop()
         {
             try
@@ -340,14 +345,14 @@ namespace ToolCore.Session
                                     if (entity is MyVoxelBase)
                                     {
                                         var voxelMatDef = ((MyVoxelBase)entity).GetMaterialAt(ref hitPos);
-                                        material = voxelMatDef?.MaterialTypeNameHash ?? MyStringHash.GetOrCompute("Rock");
+                                        material = voxelMatDef?.MaterialTypeNameHash ?? RockHash;
                                     }
                                     else if (entity is IMyCharacter)
-                                        material = MyStringHash.GetOrCompute("Character");
+                                        material = CharacterHash;
                                     else if (entity is MyEnvironmentSector)
-                                        material = MyStringHash.GetOrCompute("Tree");
+                                        material = TreeHash;
                                     else
-                                        material = MyStringHash.GetOrCompute("Metal");
+                                        material = MetalHash;
 
                                     if (def.Location == Location.Hit)
                                         worldPos = hitPos;

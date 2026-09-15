@@ -22,7 +22,7 @@ namespace ToolCore.Comp
         internal long CompTick20;
         internal long LastSafezoneTick = 0;
 
-        internal Dictionary<int, bool> SZAllowed = new Dictionary<int, bool>() { { 4, false }, { 8, false }, {16, false }};
+        internal readonly bool[] SZAllowed = new bool[17]; //indexed by (int)ToolMode
 
         internal bool UnderControl;
         internal bool Dirty;
