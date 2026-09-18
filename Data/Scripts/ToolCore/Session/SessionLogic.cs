@@ -196,7 +196,7 @@ namespace ToolCore.Session
                                         turret.LastTargetTick = Tick;
 
                                     //Delay at least a couple projector updates to ensure no targets before returning home
-                                    if (!turret.HasTarget && turret.Part1.DesiredRotation != 0 && turret.LastTargetTick + 200 <= Tick)
+                                    if (!turret.HasTarget && turret.LastTargetTick + def.UpdateInterval * 5 <= Tick && (turret.Part1.DesiredRotation != 0 || (turret.HasTwoParts && (turret.Part2.DesiredRotation != 0 || turret.Part1.DesiredRotation != 0))))
                                     {
                                         turret.GoHome();
                                     }

@@ -114,7 +114,10 @@ namespace ToolCore.Comp
         internal bool TrackTarget()
         {
             var target = ActiveTarget;
-            var targetWorld = target.CubeGrid.GridIntegerToWorld(target.Position);
+            BoundingBoxD AABB;
+            target.GetWorldBoundingBox(out AABB);
+            var targetWorld = AABB.Center;
+            //var targetWorld = target.CubeGrid.GridIntegerToWorld(target.Position);
 
             Vector3D targetLocal1;
             var parentMatrixNI1 = Part1.Parent.PositionComp.WorldMatrixNormalizedInv;
