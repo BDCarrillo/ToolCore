@@ -657,7 +657,7 @@ namespace ToolCore
                     var slim = layer[j];
                     var fat = slim.FatBlock;
                     var grid = slim.CubeGrid as MyCubeGrid;
-                    if (slim.IsFullyDismounted || grid.MarkedForClose || (fat != null && (fat.MarkedForClose || (comp.IsBlock && grid == comp.Grid && fat == comp.BlockTool.SlimBlock))))
+                    if (slim.IsFullyDismounted || grid.MarkedForClose || (fat != null && (fat.MarkedForClose || (comp.IsBlock && grid == comp.Grid && fat == comp.BlockTool))))
                     {
                         if (def.Debug) comp.DebugDrawBlock(slim, Color.Red);
                         continue;
@@ -918,7 +918,7 @@ namespace ToolCore
 
                         var fat = slim.FatBlock;
                         var grid = slim.CubeGrid as MyCubeGrid;
-                        if (slim.IsFullyDismounted || grid.MarkedForClose || (fat != null && (fat.MarkedForClose || (comp.IsBlock && grid == comp.Grid && fat == comp.BlockTool.SlimBlock))))
+                        if (slim.IsFullyDismounted || grid.MarkedForClose || (fat != null && (fat.MarkedForClose || (comp.IsBlock && grid == comp.Grid && fat == comp.BlockTool))))
                         {
                             if (def.Debug) comp.DebugDrawBlock(slim, Color.Red);
                             continue;
