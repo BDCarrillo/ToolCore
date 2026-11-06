@@ -22,21 +22,20 @@ namespace ToolCore.Session
             {
                 grid.AddedToScene += addToStart => _startGrids.Add(grid);
 
-                if (BlockLimits.TrackPCU)
-                {
-                    grid.OnBlockAdded += slim => SlimList.Add(slim);
-                    grid.OnBlockClosed += slim => SlimList.Remove(slim);
-                }
+                //if (BlockLimits.TrackPCU) // Seems PCU Checks and world limits aren't even functional??
+                //{
+                //    grid.OnBlockAdded += slim => SlimList.Add(slim);
+                //    grid.OnBlockClosed += slim => SlimList.Remove(slim);
+                //}
                 return;
             }
 
-            if (BlockLimits.TrackPCU && entity is MyCubeBlock)
-            {
-                var block = entity as MyCubeBlock;
-                SlimList.Add(block.SlimBlock);
-                block.OnClose += ent => SlimList.Remove(((MyCubeBlock)ent).SlimBlock);
-
-            }
+            //if (BlockLimits.TrackPCU && entity is MyCubeBlock)
+            //{
+            //    var block = entity as MyCubeBlock;
+            //    SlimList.Add(block.SlimBlock);
+            //    block.OnClose += ent => SlimList.Remove(((MyCubeBlock)ent).SlimBlock);
+            //}
 
             var sorter = entity as IMyConveyorSorter;
             var handTool = entity as IMyHandheldGunObject<MyDeviceBase>;
